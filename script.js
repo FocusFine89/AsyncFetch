@@ -13,7 +13,7 @@ const generateCard = (cardTitle, imgUrl, price, category, asin) => {
   div.classList.add("card");
   // creo un img, ci aggiungo gli attributi e lo inserisco all'interno del div card
   const img = document.createElement("img");
-  img.setAttribute("src", "");
+  img.setAttribute("src", imgUrl);
   div.appendChild(img);
   //   creo un div con classe card body
   const cardBody = document.createElement("div");
@@ -33,15 +33,15 @@ const generateCard = (cardTitle, imgUrl, price, category, asin) => {
 
   const cardBody2 = document.createElement("div");
   const btnDelete = document.createElement("button");
-  btnDelete.classList.add("btn", "btn-danger");
+  btnDelete.classList.add("btn", "btn-danger", "mt-3");
   btnDelete.innerText = "Scarta";
   cardBody2.appendChild(btnDelete);
 
   //   aggiungo i dati all'interno della card
   h5.innerText = cardTitle;
   p.innerText = "Codice asin: " + asin;
-  liPrice.innerText = price;
-  liCategory.innerText = category;
+  liPrice.innerText = `Prezzo: ${price} euro`;
+  liCategory.innerText = "Categoria: " + category;
 
   //   aggiungo tutto al container
   divCol.appendChild(div);
@@ -50,5 +50,45 @@ const generateCard = (cardTitle, imgUrl, price, category, asin) => {
 };
 
 const fetchCharacters = () => {
-  fetch("https://striveschool-api.herokuapp.com/books");
+  fetch("https://striveschool-api.herokuapp.com/books")
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        if (response.status === 400) {
+          throw new Error("Bad Request");
+        }
+        if (response.status === 401) {
+          throw new Error("Unauthorized");
+        }
+        if (response.status === 403) {
+          throw new Error("Forbidden");
+        }
+        if (response.status === 404) {
+          throw new Error("Not Found");
+        }
+        if (response.status === 500) {
+          throw new Error("Server Error");
+        }
+
+        throw new Error("Generic Fetch Error");
+      }
+    })
+
+    .then((libraryData) => {
+      console.log(libraryData);
+      //   qui dentro andrà tutto il codice per prendere gli elementi dell'api
+      libraryData.forEach((libro) => {
+        generateCard(
+          libro.title,
+          libro.img,
+          libro.price,
+          libro.category,
+          libro.asin
+        );
+      });
+    })
+    .catch((error) => console.log(error));
 };
+
+fetchCharacters();
